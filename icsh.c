@@ -8,6 +8,7 @@
 #include "string.h"
 #include "stdlib.h"
 #include "unistd.h"
+#include "fcntl.h"
 #include "sys/types.h"
 #include "sys/wait.h"
 
@@ -22,6 +23,13 @@ int last_exit_code = 0;
 
 // MILESTONE 1: echo
 // Edited for MILESTONE 4: Now prints the last exit code (default 0 for builtin commands)
+
+// MILESTONE 5 NOTE:
+// !! THIS IS NOW REDUNDANT !!
+// Changed to make echo be handled as an external command, but
+// have special case for $? that prints out the last exit code.
+// but I will keep this here anyway as it is part of previous milestones.
+
 void command_echo(const char *input) {
     const char *msg = input + 5;
 
@@ -62,11 +70,27 @@ void command_external(const char *input) {
     char buffer[MAX_CMD_BUFFER];
     strcpy(buffer, input);
 
+    // MILESTONE 5: I/O redirection, so we need to have variables to store
+    // both input and output file names (depending on direction of redirection)
+    char *input_file = NULL;
+    char *output_file = NULL;
+
     // Divide/tokenize the arguments, null terminate at the end
+    // NEW for MILESTONE 5: Detecting redirection
     int i = 0;
     char *token = strtok(buffer, " ");
     while (token != NULL && i < MAX_CMD_BUFFER / 2) {
-        args[i++] = token;
+        if (strcmp(token, "<") == 0) {
+            token = strtok(NULL, " ");
+            if (token == NULL) break;
+            input_file = token;
+        } else if (strcmp(token, ">") == 0) {
+            token = strtok(NULL, " ");
+            if (token == NULL) break;
+            output_file = token;
+        } else {
+            args[i++] = token;
+        }
         token = strtok(NULL, " ");
     }
     args[i] = NULL;
@@ -82,6 +106,29 @@ void command_external(const char *input) {
      */
     pid_t pid = fork();
     if (pid == 0) { // If child,
+
+        // Setting up both input and output file redirection.
+        if (input_file) {
+            // Flags: read only
+            int fd_in = open(input_file, O_RDONLY);
+            if (fd_in < 0) {
+                perror("Input file error");
+                exit(1);
+            }
+            dup2(fd_in, STDIN_FILENO); // syscall to redirect stdin from file and not terminal
+            close(fd_in);
+        }
+
+        if (output_file) {
+            // Flags: write, create if not exist, truncate if exist, 0644 (octal permissions rw-r--r--)
+            int fd_out = open(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            if (fd_out < 0) {
+                perror("Output file error");
+                exit(1);
+            }
+            dup2(fd_out, STDOUT_FILENO); // syscall to redirect stdout to file
+            close(fd_out);
+        }
         execvp(args[0], args);
         perror("Execution failed");
         exit(1);
@@ -155,8 +202,11 @@ int shell(FILE *input_stream, int script) {
             strcpy(last_command, buffer); // Save current command as last command
         }
 
-        if (strncmp(buffer, "echo ", 5) == 0) { // echo
-            command_echo(buffer);
+        if (strcmp(buffer, "echo $?") == 0) {
+            printf("%d\n", last_exit_code);
+            last_exit_code = 0; // special echo to print out exit code
+        } else if (strncmp(buffer, "echo ", 5) == 0) {
+            command_external(buffer);  // treat all other echo as external, so supports redirection
         } else if (strncmp(buffer, "exit", 4) == 0 && (buffer[4] == ' ' || buffer[4] == '\0')) {
             return command_exit(buffer);
         } else {

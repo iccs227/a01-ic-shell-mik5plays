@@ -4,6 +4,7 @@
  */
 
 #include "stdio.h"
+#include "signal.h"
 #include "string.h"
 #include "stdlib.h"
 #include "unistd.h"
@@ -12,9 +13,26 @@
 
 #define MAX_CMD_BUFFER 255
 
+// MILESTONE 4: Signal Handler
+// We keep the foreground process's (SINGULAR) PID
+// as well as storing the last exit status (default at 0)
+volatile sig_atomic_t fg_pid = 0;
+int last_exit_code = 0;
+
+
 // MILESTONE 1: echo
+// Edited for MILESTONE 4: Now prints the last exit code (default 0 for builtin commands)
 void command_echo(const char *input) {
-    printf("%s\n", input + 5); // Print everything after "echo "
+    const char *msg = input + 5;
+
+    if (strcmp(msg, "$?") == 0) {
+        printf("%d\n", last_exit_code);
+    } else {
+        printf("%s\n", msg);
+    }
+
+    last_exit_code = 0; // MILESTONE 4 edit
+
 }
 
 // MILESTONE 1: exit
@@ -27,6 +45,7 @@ int command_exit(const char *input) {
     }
 
     printf("Bye. Shell exited with code %d.\n", code);
+    last_exit_code = 0; // MILESTONE 4 edit
     return code;
 }
 
@@ -43,7 +62,7 @@ void command_external(const char *input) {
     char buffer[MAX_CMD_BUFFER];
     strcpy(buffer, input);
 
-    // Divide the arguments, null terminate at the end
+    // Divide/tokenize the arguments, null terminate at the end
     int i = 0;
     char *token = strtok(buffer, " ");
     while (token != NULL && i < MAX_CMD_BUFFER / 2) {
@@ -62,15 +81,43 @@ void command_external(const char *input) {
      * complete and resume control of the terminal."
      */
     pid_t pid = fork();
-    if (pid == 0) {
+    if (pid == 0) { // If child,
         execvp(args[0], args);
         perror("Execution failed");
         exit(1);
-    } else if (pid > 0) {
+    } else if (pid > 0) { // If parent,
+        // MILESTONE 4 edit for signal handling
+        fg_pid = pid;
         int status;
-        waitpid(pid, &status, 0);
+        waitpid(pid, &status, WUNTRACED);
+        fg_pid = 0;
+
+        // See if child terminated correctly
+        // Account for normal + signal exits.
+        if (WIFEXITED(status)) {
+            last_exit_code = WEXITSTATUS(status);
+        } else if (WIFSIGNALED(status)) {
+            last_exit_code = 128 + WTERMSIG(status);
+        } else {
+            last_exit_code = 1;
+        }
+
     } else {
         perror("Fork failed");
+    }
+}
+
+// MILESTONE 4: Signal Handling
+// Handler functions for both SIGINT and SIGTSTP
+void handle_sigint(int signo) {
+    if (fg_pid > 0) {
+        kill(fg_pid, SIGINT);
+    }
+}
+
+void handle_sigtstp(int signo) {
+    if (fg_pid > 0) {
+        kill(fg_pid, SIGTSTP);
     }
 }
 
@@ -121,6 +168,11 @@ int shell(FILE *input_stream, int script) {
 }
 int main(int argc, char *argv[]) {
     // MILESTONE 2: Script Handling
+
+    // MILESTONE 4: Installing signal handlers
+    signal(SIGINT, handle_sigint);
+    signal(SIGTSTP, handle_sigtstp);
+
     if (argc == 2) { // If there are arguments
         FILE *script = fopen(argv[1], "r");
 

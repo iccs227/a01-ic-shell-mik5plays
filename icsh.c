@@ -6,6 +6,9 @@
 #include "stdio.h"
 #include "string.h"
 #include "stdlib.h"
+#include "unistd.h"
+#include "sys/types.h"
+#include "sys/wait.h"
 
 #define MAX_CMD_BUFFER 255
 
@@ -28,8 +31,47 @@ int command_exit(const char *input) {
 }
 
 // Handling empty, unknown, invalid commands
+// Redundant, as I will assume from now that unknown commands could be external
 void command_unknown() {
     printf("Bad command.\n");
+}
+
+void command_external(const char *input) {
+
+    // Say, half of the buffer could be arguments, at which we store them.
+    char *args[MAX_CMD_BUFFER / 2 + 1];
+    char buffer[MAX_CMD_BUFFER];
+    strcpy(buffer, input);
+
+    // Divide the arguments, null terminate at the end
+    int i = 0;
+    char *token = strtok(buffer, " ");
+    while (token != NULL && i < MAX_CMD_BUFFER / 2) {
+        args[i++] = token;
+        token = strtok(NULL, " ");
+    }
+    args[i] = NULL;
+
+    if (args[0] == NULL) {
+        return; // No arguments, terminate
+    }
+
+    /*
+     * "Your shell must spawn a new process,
+     * execute it and wait for the command to
+     * complete and resume control of the terminal."
+     */
+    pid_t pid = fork();
+    if (pid == 0) {
+        execvp(args[0], args);
+        perror("Execution failed");
+        exit(1);
+    } else if (pid > 0) {
+        int status;
+        waitpid(pid, &status, 0);
+    } else {
+        perror("Fork failed");
+    }
 }
 
 // Separate function for the shell, as we will use main() to handle arguments
@@ -71,7 +113,7 @@ int shell(FILE *input_stream, int script) {
         } else if (strncmp(buffer, "exit", 4) == 0 && (buffer[4] == ' ' || buffer[4] == '\0')) {
             return command_exit(buffer);
         } else {
-            command_unknown();
+            command_external(buffer); // Assume it might be an external command
         }
     }
 

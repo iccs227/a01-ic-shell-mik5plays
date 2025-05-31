@@ -224,6 +224,34 @@ void command_bg(const char *input) {
     printf("[%d]+ \t%s \n", curr->id, curr->command);
 }
 
+// MILESTONE 7:
+// pusheen says: basically just echo except pusheen says your sentence
+// represents the hardships that we went through during DSOOP
+void command_psays(const char *input) {
+    const char *msg = input + 12;
+
+    printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣤⡀⠀⠀⠀⠀⠀⠀⠀⣀⣀⡀⠀⠀⠀⠀⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⡀⠀⠀⠀⢀⣾⠋⠉⢿⣆⠀⠀⠀⠀⢀⣾⠟⠙⢿⣄⠀⠀⠀⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣤⣶⢿⣿⢻⡛⠛⢛⡟⠛⠛⠿⠿⠃⠀⠀⠀⠻⣿⢿⣿⢿⣿⠁⠀⠀⠀⢻⡆⠀⠀⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⡾⠋⠫⣀⡠⠃⠀⠑⠶⠚⣥⣀⣀⡀⠀⠀⠀⠀⠀⠀⠋⠀⠋⠈⠋⠀⠀⠀⠀⠈⣿⡀⣀⣀⣀⡀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⡾⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⣉⣉⣛⠃⠀⠀⣴⣦⠀⠀⠀⣦⠀⠀⢠⣶⡄⠀⠀⢸⣟⠛⠉⠉⠁\n");
+    printf("⢰⣿⣿⣦⠀⠀⠀⠀⣰⡟⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠛⠛⠛⠛⠃⠀⠀⠛⠛⠀⠘⠿⠻⠟⠀⠘⠛⠃⠀⠀⠈⣿⠛⠛⠛⠃     < (%s)\n", msg);
+    printf("⢸⣯⠟⠛⣷⡀⠀⢠⡿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀\n");
+    printf("⠀⠹⣧⣴⣿⡿⢶⣾⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣇⠀⠀⠀\n");
+    printf("⠀⠀⠘⢿⣮⡀⡞⢹⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠈⠛⢿⣾⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⢹⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⠈⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⠀⠹⣧⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡿⠁⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠻⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣰⡟⠁⠀⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⡾⠋⠀⠀⠀⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣤⡿⠛⠛⠛⠛⢿⣤⣿⠛⠛⠛⠛⠛⠛⠛⢿⣤⣾⠛⠛⠛⠛⠻⣧⣼⡏⠀⠀⠀⠀⠀⠀⠀⠀\n");
+    printf("⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠀⠀⠀⠀⠀⠀⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠉⠁⠀⠀⠀⠀⠀⠉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀\n");
+
+    last_exit_code = 0; // MILESTONE 4 edit
+}
+
 void command_external(const char *input) {
 
     // Say, half of the buffer could be arguments, at which we store them.
@@ -429,6 +457,8 @@ int shell(FILE *input_stream, int script) {
             command_fg(buffer);
         } else if (strncmp(buffer, "bg ", 3) == 0) {
             command_bg(buffer);
+        } else if (strncmp(buffer, "pusheensays ", 12) == 0) {
+            command_psays(buffer);
         } else {
             command_external(buffer); // Assume it might be an external command
         }
